@@ -1,4 +1,4 @@
-import json
+import atexit
 import pickle
 from pathlib import Path
 
@@ -10,7 +10,7 @@ class FileHandler:
     This class is responsible for program interaction with saved images,
      it keeps index of images for faster image lookup
     """
-    file_format = '.png'
+    file_format: str = '.png'
     data_dir: Path = Path('data')
     index_path: Path = Path('index.pickle')
     full_index_path: Optional[Path] = None
@@ -32,9 +32,11 @@ class FileHandler:
             cls.index_save()
 
         cls.index_load()
+        atexit.register(cls.index_save)
 
     @classmethod
     def index_load(cls) -> None:
+        print('Saving file index to file')
         with open(cls.full_index_path, 'rb') as file:
             cls.index = pickle.load(file)
 
@@ -49,9 +51,8 @@ class FileHandler:
 
         if key not in cls.index:
             cls.index[key] = set()
-            cls.index[key].add(filepath)
 
-        cls.index_save()
+        cls.index[key].add(filepath)
 
     @classmethod
     def index_rescan(cls) -> None:
