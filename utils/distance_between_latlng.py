@@ -29,4 +29,3 @@ def distance_between_latlng(lat1: float, lng1: float, lat2: float, lng2: float) 
 
     dist = radius * c
     return dist
-
