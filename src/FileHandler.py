@@ -2,7 +2,7 @@ import atexit
 import pickle
 from pathlib import Path
 
-from typing import Dict, Optional, Set
+from typing import Optional, Set
 
 
 class FileHandler:
@@ -14,7 +14,7 @@ class FileHandler:
     data_dir: Path = Path('data')
     index_path: Path = Path('index.pickle')
     full_index_path: Optional[Path] = None
-    index: Dict[int, Set[str]] = {0: {'0'}}  # need to add dummy key & value for pickle
+    index: Set[str] = {'0'}  # need to add dummy key & value for pickle
 
     @classmethod
     def initialize(cls) -> None:
@@ -36,23 +36,18 @@ class FileHandler:
 
     @classmethod
     def index_load(cls) -> None:
-        print('Saving file index to file')
         with open(cls.full_index_path, 'rb') as file:
             cls.index = pickle.load(file)
 
     @classmethod
     def index_save(cls) -> None:
+        print('Saving file index to file')
         with open(cls.full_index_path, 'wb') as file:
             pickle.dump(cls.index, file)
 
     @classmethod
-    def index_add(cls, lat: float, lng: float, filepath: str) -> None:
-        key = cls.get_keys(lat, lng)
-
-        if key not in cls.index:
-            cls.index[key] = set()
-
-        cls.index[key].add(filepath)
+    def index_add(cls, filepath: str) -> None:
+        cls.index.add(filepath)
 
     @classmethod
     def index_rescan(cls) -> None:
@@ -119,7 +114,7 @@ class FileHandler:
         full_path = cls.image_get_full_path(lat, lng)
         with open(full_path, 'wb') as file:
             file.write(data)
-        cls.index_add(lat, lng, full_path.as_posix())
+        cls.index_add(full_path.as_posix())
 
     @classmethod
     def image_load(cls, lat: float, lng: float) -> bytes:
@@ -129,10 +124,9 @@ class FileHandler:
     @classmethod
     def image_exists(cls, lat: float, lng: float) -> bool:
         full_path = cls.image_get_full_path(lat, lng, create=False)
-        key = cls.get_keys(lat, lng)
-        if key in cls.index:
-            if full_path.as_posix() in cls.index[key]:
-                return True
+
+        if full_path.as_posix() in cls.index:
+            return True
         return False
 
 
