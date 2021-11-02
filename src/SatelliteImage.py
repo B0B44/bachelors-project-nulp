@@ -47,6 +47,11 @@ class SatelliteImage:
             data = API.pull(self.latitude, self.longitude)
         self.__image = self.decode_image(data)
 
+    def save_if_not_exist(self):
+        if not FileHandler.image_exists(self.latitude, self.longitude):
+            data = API.pull(self.latitude, self.longitude)
+            FileHandler.image_save(self.latitude, self.longitude, data)
+
     def display(self):
         plt.imshow(self.image)
         plt.show()
